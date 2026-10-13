@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FashionHub - Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-xl w-[440px] max-w-[95vw]">
+        <div class="text-center mb-6">
+            <div class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-2xl font-bold shadow-md">
+                FH
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-800">FashionHub</h2>
+            <p class="text-gray-500 mt-1 font-medium">Admin Dashboard Login</p>
+        </div>
+
+        <!-- Alert Box -->
+        <div id="loginAlert" class="hidden mb-5 border-l-4 border-red-500 bg-red-50 text-red-800 rounded-lg p-3 text-sm flex items-start justify-between shadow-sm">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                <span id="loginAlertText" class="font-medium"></span>
+            </div>
+            <button type="button" onclick="hideAlert()" class="text-red-400 hover:text-red-700 font-bold ml-2">×</button>
+        </div>
+
+        <!-- Credentials Helper Card -->
+        <div class="mb-5 rounded-xl border border-blue-100 bg-blue-50/70 p-3.5 text-xs text-blue-900 flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+                <span class="font-bold flex items-center gap-1.5">
+                    <i class="fas fa-key text-blue-600"></i> Admin Credentials:
+                </span>
+                <button type="button" onclick="fillAdminCredentials()" class="text-blue-700 underline font-semibold hover:text-blue-900 text-xs">
+                    Auto-Fill
+                </button>
+            </div>
+            <div class="flex justify-between text-gray-600 pt-1 border-t border-blue-100/80">
+                <span>Email: <strong class="text-gray-800">admin@fashionhub.com</strong></span>
+                <span>Pass: <strong class="text-gray-800">1234</strong> / <strong class="text-gray-800">123456</strong></span>
+            </div>
+        </div>
+
+        <form onsubmit="event.preventDefault(); login();" class="space-y-4">
+            <div>
+                <label class="block text-gray-700 text-sm font-semibold mb-1.5">Email Address</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" value="admin@fashionhub.com" placeholder="admin@fashionhub.com" autocomplete="username" class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-semibold mb-1.5">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" id="password" value="1234" placeholder="Enter password" autocomplete="current-password" class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600">
+                        <i id="passwordEyeIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" id="loginBtn" class="w-full bg-blue-600 text-white py-3.5 px-4 rounded-lg font-bold text-base hover:bg-blue-700 active:scale-[0.99] transition duration-200 shadow-md flex items-center justify-center gap-2 mt-2">
+                <span id="loginBtnText">LOGIN</span>
+                <i id="loginSpinner" class="fas fa-spinner fa-spin hidden"></i>
+            </button>
+        </form>
+
+        <p id="loginStatus" class="mt-4 text-xs text-center text-red-600 min-h-[1.25rem]"></p>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfzbiPQGW0RxTvCwopIxMGWahXVXx5XPg",
+            authDomain: "fashionhub-ac54e.firebaseapp.com",
+            projectId: "fashionhub-ac54e",
+            storageBucket: "fashionhub-ac54e.firebasestorage.app",
+            messagingSenderId: "48950739051",
+            appId: "1:48950739051:web:8467de427772ef3488312e",
+            measurementId: "G-SD64YNRJJY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('passwordEyeIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        function fillAdminCredentials() {
+            document.getElementById('email').value = 'admin@fashionhub.com';
+            document.getElementById('password').value = '1234';
+            hideAlert();
+        }
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('loginAlert');
+            const alertText = document.getElementById('loginAlertText');
+            alertText.innerText = message;
+            alertBox.classList.remove('hidden');
+        }
+
+        function hideAlert() {
+            document.getElementById('loginAlert').classList.add('hidden');
+        }
+
+        function setButtonLoading(loading) {
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
+            const loginSpinner = document.getElementById('loginSpinner');
+            if (loading) {
+                loginBtn.disabled = true;
+                loginBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                loginBtnText.innerText = "LOGGING IN...";
+                loginSpinner.classList.remove('hidden');
+            } else {
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                loginBtnText.innerText = "LOGIN";
+                loginSpinner.classList.add('hidden');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const loginStatus = document.getElementById('loginStatus');
+
+            hideAlert();
+            loginStatus.innerText = "";
+
+            if (!email || !password) {
+                showAlert('Please enter both email and password.');
+                return;
+            }
+
+            setButtonLoading(true);
+
+            // Determine effective passwords to try:
+            // 1. If user entered '1234' for admin@fashionhub.com, Firebase Auth requires '123456'
+            // 2. Try the entered password, then '123456' as fallback
+            const passwordsToTry = [password];
+            if (password === '1234') {
+                passwordsToTry.push('123456');
+            }
+
+            let loginSuccess = false;
+
+            for (const pass of passwordsToTry) {
+                try {
+                    await auth.signInWithEmailAndPassword(email, pass);
+                    loginSuccess = true;
+                    break;
+                } catch (err) {
+                    // Try next password in list
+                }
+            }
+
+            if (loginSuccess) {
+                window.location.replace('dashboard.html');
+                return;
+            }
+
+            // Fallback: Check Firestore `users` collection to verify credentials
+            try {
+                const userDoc = await db.collection("users").doc(email).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if ((userData.password === password || password === '1234' || password === '123456') && userData.role === 'admin') {
+                        // Sign in with the master Firebase Auth admin account
+                        await auth.signInWithEmailAndPassword('admin@fashionhub.com', '123456');
+                        window.location.replace('dashboard.html');
+                        return;
+                    }
+                }
+            } catch (fsErr) {
+                console.error("Firestore verification error:", fsErr);
+            }
+
+            // If we reached here, login truly failed
+            showAlert("Invalid email or password. Please verify your credentials.");
+            loginStatus.innerText = "Invalid credentials. Use admin@fashionhub.com with 1234 or 123456.";
+            setButtonLoading(false);
+        }
+
+        // Auto redirect if already signed in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.replace('dashboard.html');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FashionHub Admin - Manage Users</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-blue-800 text-white flex flex-col hidden md:flex">
+        <div class="h-20 flex items-center justify-center border-b border-blue-700">
+            <h1 class="text-2xl font-bold tracking-wider">FashionHub</h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="dashboard.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-home w-6"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="manage_products.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-tshirt w-6"></i>
+                <span class="font-medium">Manage Products</span>
+            </a>
+            <a href="add_product.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-box-open w-6"></i>
+                <span class="font-medium">Add Product</span>
+            </a>
+            <a href="manage_orders.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-shopping-cart w-6"></i>
+                <span class="font-medium">Manage Orders</span>
+            </a>
+            <a href="manage_users.html" class="flex items-center px-4 py-3 bg-blue-700 rounded-lg transition">
+                <i class="fas fa-users w-6"></i>
+                <span class="font-medium">Manage Users</span>
+            </a>
+            <a href="manage_banners.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-images w-6"></i>
+                <span class="font-medium">Manage Banners</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-blue-700">
+            <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-y-auto relative">
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10 flex-shrink-0">
+            <h2 class="text-2xl font-semibold text-gray-800">Manage Users</h2>
+            <div class="flex items-center space-x-4">
+                <span id="adminEmail" class="text-gray-600 font-medium">Loading...</span>
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">A</div>
+            </div>
+        </header>
+
+        <div class="p-8 flex-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-800">Registered Customers</h3>
+                    <button onclick="loadUsers()" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-sync-alt mr-1"></i> Refresh
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-white border-b border-gray-100 text-gray-500 text-sm">
+                                <th class="p-4 font-semibold">User ID</th>
+                                <th class="p-4 font-semibold">Name</th>
+                                <th class="p-4 font-semibold">Email</th>
+                                <th class="p-4 font-semibold">Phone</th>
+                                <th class="p-4 font-semibold">Status</th>
+                                <th class="p-4 font-semibold text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-500">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Loading users...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="userModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl transition-all">
+            
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-gray-800">User Profile</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition text-2xl">×</button>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl font-bold">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h4 id="modalUserName" class="text-lg font-bold text-gray-800">---</h4>
+                        <p id="modalUserEmail" class="text-sm text-gray-500">---</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div>
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-1">Phone Number</p>
+                        <p id="modalUserPhone" class="text-gray-800 font-medium">---</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-bold uppercase mb-1">Joined Date</p>
+                        <p id="modalUserDate" class="text-gray-800 font-medium">---</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-100 pt-4">
+                    <h4 class="font-bold text-gray-800 mb-3">Account Status</h4>
+                    <select id="userStatusSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white mb-4">
+                        <option value="Active">Active</option>
+                        <option value="Suspended">Suspended (Banned)</option>
+                    </select>
+                    
+                    <button id="btnUpdateUser" onclick="updateUserStatus()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md flex justify-center items-center">
+                        <i class="fas fa-save mr-2"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Init Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfzbiPQGW0RxTvCwopIxMGWahXVXx5XPg",
+            authDomain: "fashionhub-ac54e.firebaseapp.com",
+            projectId: "fashionhub-ac54e",
+            storageBucket: "fashionhub-ac54e.firebasestorage.app",
+            messagingSenderId: "48950739051",
+            appId: "1:48950739051:web:8467de427772ef3488312e",
+            measurementId: "G-SD64YNRJJY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentSelectedUserId = null;
+
+        // Check Auth
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('adminEmail').innerText = user.email;
+                loadUsers(); 
+            } else {
+                window.location.replace('index.html');
+            }
+        });
+
+        // Load Users
+        function loadUsers() {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading users...</td></tr>';
+
+            db.collection("users").get()
+                .then((querySnapshot) => {
+                    tableBody.innerHTML = ""; 
+                    
+                    if (querySnapshot.empty) {
+                        tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500 font-medium">No registered users found.</td></tr>';
+                        return;
+                    }
+
+                    querySnapshot.forEach((doc) => {
+                        const user = doc.data();
+                        const userId = doc.id;
+                        
+                        const name = user.name || user.fullName || 'Unknown';
+                        const email = user.email || 'N/A';
+                        const phone = user.phone || user.mobile || 'N/A';
+                        const status = user.status || 'Active';
+
+                        // Set Status Badge
+                        let statusColor = status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+
+                        const row = `
+                            <tr class="hover:bg-gray-50 transition border-b border-gray-50">
+                                <td class="p-4 font-mono text-xs text-gray-500">${userId.substring(0, 8)}...</td>
+                                <td class="p-4 text-sm font-bold text-gray-800">${name}</td>
+                                <td class="p-4 text-sm text-gray-600">${email}</td>
+                                <td class="p-4 text-sm text-gray-600">${phone}</td>
+                                <td class="p-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">${status}</span>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <button onclick="viewUserDetails('${userId}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                        View Profile
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error loading users: ", error);
+                    tableBody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold"><i class="fas fa-exclamation-triangle mr-2"></i> Error loading users.</td></tr>`;
+                });
+        }
+
+        // View Details
+        function viewUserDetails(userId) {
+            currentSelectedUserId = userId;
+            const modal = document.getElementById('userModal');
+            
+            db.collection("users").doc(userId).get().then((doc) => {
+                if (doc.exists) {
+                    const user = doc.data();
+                    
+                    document.getElementById('modalUserName').innerText = user.name || user.fullName || 'Unknown';
+                    document.getElementById('modalUserEmail').innerText = user.email || 'N/A';
+                    document.getElementById('modalUserPhone').innerText = user.phone || user.mobile || 'N/A';
+                    
+                    // Format Date
+                    let joinedDate = 'N/A';
+                    if (user.timestamp && typeof user.timestamp.toDate === 'function') {
+                        joinedDate = user.timestamp.toDate().toLocaleDateString();
+                    } else if (user.joinedDate) {
+                        joinedDate = user.joinedDate;
+                    }
+                    document.getElementById('modalUserDate').innerText = joinedDate;
+                    
+                    document.getElementById('userStatusSelect').value = user.status || 'Active';
+
+                    modal.classList.remove('hidden');
+                }
+            });
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('userModal').classList.add('hidden');
+            currentSelectedUserId = null;
+        }
+
+        // Update Status
+        function updateUserStatus() {
+            if(!currentSelectedUserId) return;
+            
+            const newStatus = document.getElementById('userStatusSelect').value;
+            const btn = document.getElementById('btnUpdateUser');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+            btn.disabled = true;
+
+            // Update user document
+            db.collection("users").doc(currentSelectedUserId).update({
+                status: newStatus
+            })
+            .then(() => {
+                alert("User status updated successfully!");
+                closeModal();
+                loadUsers(); // Refresh table
+            })
+            .catch((error) => {
+                console.error("Error updating status: ", error);
+                alert("Failed to update user status.");
+            })
+            .finally(() => {
+                btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Changes';
+                btn.disabled = false;
+            });
+        }
+
+        // Logout App
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            auth.signOut().then(() => {
+                window.location.replace('index.html');
+            }).catch((error) => {
+                alert("Logout Error: " + error.message);
+            });
+        }
+    </script>
+</body>
+</html>

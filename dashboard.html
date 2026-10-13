@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FashionHub Admin - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-800 text-white flex flex-col hidden md:flex">
+        <div class="h-20 flex items-center justify-center border-b border-blue-700">
+            <h1 class="text-2xl font-bold tracking-wider">FashionHub</h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="dashboard.html" class="flex items-center px-4 py-3 bg-blue-700 rounded-lg transition">
+                <i class="fas fa-home w-6"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="manage_products.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-tshirt w-6"></i>
+                <span class="font-medium">Manage Products</span>
+            </a>
+            <a href="add_product.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-box-open w-6"></i>
+                <span class="font-medium">Add Product</span>
+            </a>
+            <a href="manage_orders.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-shopping-cart w-6"></i>
+                <span class="font-medium">Manage Orders</span>
+            </a>
+            <a href="manage_users.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-users w-6"></i>
+                <span class="font-medium">Manage Users</span>
+            </a>
+            <a href="manage_banners.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-images w-6"></i>
+                <span class="font-medium">Manage Banners</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-blue-700">
+            <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-y-auto">
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10">
+            <div class="flex items-center space-x-3">
+                <h2 class="text-2xl font-semibold text-gray-800">Dashboard Overview</h2>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span class="w-2 h-2 mr-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                    Live Sync
+                </span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="adminEmail" class="text-gray-600 font-medium">Loading...</span>
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
+                    A
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <!-- 4 Metrics Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Products -->
+                <div onclick="window.location.href='manage_products.html'" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center cursor-pointer hover:shadow-md hover:border-blue-200 transition group">
+                    <div class="p-4 bg-blue-50 text-blue-600 rounded-xl mr-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <i class="fas fa-tshirt text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Total Products</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 id="totalProducts" class="text-2xl font-bold text-gray-800">...</h3>
+                            <span id="lowStockWarning" class="text-xs text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-full hidden"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Orders -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
+                    <div class="p-4 bg-green-50 text-green-600 rounded-xl mr-4">
+                        <i class="fas fa-shopping-bag text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Today's Orders</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 id="totalOrders" class="text-2xl font-bold text-gray-800">0</h3>
+                            <span id="allTimeOrdersCount" class="text-xs text-gray-400 font-medium">(Total: 0)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Revenue -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
+                    <div class="p-4 bg-purple-50 text-purple-600 rounded-xl mr-4">
+                        <i class="fas fa-wallet text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Today's Revenue</p>
+                        <h3 id="totalRevenue" class="text-2xl font-bold text-gray-800 mt-1">Rs. 0.00</h3>
+                    </div>
+                </div>
+
+                <!-- Total All-Time Revenue -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
+                    <div class="p-4 bg-amber-50 text-amber-600 rounded-xl mr-4">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-semibold uppercase tracking-wider">All-Time Revenue</p>
+                        <h3 id="allTimeRevenue" class="text-2xl font-bold text-gray-800 mt-1">Rs. 0.00</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue Chart (Last 7 Days) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Revenue Overview (Last 7 Days)</h3>
+                    <span class="text-xs text-gray-400 font-medium"><i class="fas fa-bolt text-amber-500 mr-1"></i>Updates automatically on new mobile purchases</span>
+                </div>
+                <div class="w-full h-72">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hidden" id="welcomeBanner">
+                <img src="https://illustrations.popsy.co/blue/work-from-home.svg" alt="Welcome" class="h-64 mx-auto mb-4">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Welcome to your Admin Panel!</h3>
+                <p class="text-gray-500 mb-6">Use the sidebar to manage your products, orders, and send notifications to your customers.</p>
+                <a href="add_product.html" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-2"></i> Add New Product
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfzbiPQGW0RxTvCwopIxMGWahXVXx5XPg",
+            authDomain: "fashionhub-ac54e.firebaseapp.com",
+            projectId: "fashionhub-ac54e",
+            storageBucket: "fashionhub-ac54e.firebasestorage.app",
+            messagingSenderId: "48950739051",
+            appId: "1:48950739051:web:8467de427772ef3488312e",
+            measurementId: "G-SD64YNRJJY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let myChart = null; 
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('adminEmail').innerText = user.email;
+                setupRealtimeDashboard();
+            } else {
+                window.location.replace('index.html');
+            }
+        });
+
+        function setupRealtimeDashboard() {
+            // 1. Real-time Products Count & Stock Alert
+            db.collection("products").onSnapshot((productsSnapshot) => {
+                document.getElementById('totalProducts').innerText = productsSnapshot.size;
+                let lowOrOut = 0;
+                productsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const stock = (data.stock !== undefined && data.stock !== null) ? parseInt(data.stock) : 0;
+                    if (stock <= 5) lowOrOut++;
+                });
+                const warnEl = document.getElementById('lowStockWarning');
+                if (warnEl) {
+                    if (lowOrOut > 0) {
+                        warnEl.innerText = `${lowOrOut} low/out`;
+                        warnEl.classList.remove('hidden');
+                    } else {
+                        warnEl.classList.add('hidden');
+                    }
+                }
+            }, (error) => {
+                console.error("Products listener error:", error);
+            });
+
+            // 2. Real-time Orders & Revenue Sync
+            db.collection("orders").onSnapshot((ordersSnapshot) => {
+                updateDashboardWithOrders(ordersSnapshot);
+            }, (error) => {
+                console.error("Orders listener error:", error);
+            });
+        }
+
+        function updateDashboardWithOrders(ordersSnapshot) {
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+
+            // Prepare 7-day buckets
+            let labels = [];
+            let revenueData = [0, 0, 0, 0, 0, 0, 0];
+            
+            for (let i = 6; i >= 0; i--) {
+                let d = new Date();
+                d.setDate(today.getDate() - i);
+                labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            }
+
+            let todayOrdersCount = 0;
+            let todayRevenue = 0;
+            let allTimeRevenue = 0;
+            let totalOrdersCount = ordersSnapshot.size;
+
+            ordersSnapshot.forEach(doc => {
+                const data = doc.data();
+                
+                // Crucial fix: The Android mobile app saves the price as `totalAmount`
+                const orderAmount = parseFloat(data.totalAmount || data.totalPrice || data.price || 0);
+                const status = (data.status || 'Pending').toLowerCase();
+
+                // Exclude canceled / cancelled orders from revenue calculation
+                const isCanceled = status === 'canceled' || status === 'cancelled';
+                if (!isCanceled) {
+                    allTimeRevenue += orderAmount;
+                }
+
+                // Parse order date
+                let orderDate = null;
+                if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+                    orderDate = data.timestamp.toDate();
+                } else if (data.timestamp) {
+                    orderDate = new Date(data.timestamp);
+                }
+
+                if (orderDate && !isNaN(orderDate.getTime())) {
+                    // Check if placed today
+                    if (orderDate >= startOfToday && orderDate <= today) {
+                        todayOrdersCount++;
+                        if (!isCanceled) {
+                            todayRevenue += orderAmount;
+                        }
+                    }
+
+                    // Check if within last 7 days for the chart
+                    let diffTime = today.getTime() - orderDate.getTime();
+                    let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    let index = 6 - diffDays;
+                    
+                    if (index >= 0 && index < 7 && !isCanceled) {
+                        revenueData[index] += orderAmount;
+                    }
+                }
+            });
+
+            // Update UI Counters
+            document.getElementById('totalOrders').innerText = todayOrdersCount;
+            document.getElementById('allTimeOrdersCount').innerText = `(Total: ${totalOrdersCount})`;
+            document.getElementById('totalRevenue').innerText = "Rs. " + todayRevenue.toFixed(2);
+            document.getElementById('allTimeRevenue').innerText = "Rs. " + allTimeRevenue.toFixed(2);
+
+            // Draw / Update Chart
+            drawChart(labels, revenueData);
+        }
+
+        function drawChart(labels, dataPoints) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            if (myChart != null) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Daily Revenue (Rs.)',
+                        data: dataPoints,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#4f46e5',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.4 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Rs. ' + context.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f3f4f6' 
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            auth.signOut().then(() => {
+                window.location.replace('index.html');
+            }).catch((error) => {
+                alert("Logout Error: " + error.message);
+            });
+        }
+    </script>
+</body>
+</html>

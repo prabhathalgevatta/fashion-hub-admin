@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FashionHub Admin - Manage Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-blue-800 text-white flex flex-col hidden md:flex">
+        <div class="h-20 flex items-center justify-center border-b border-blue-700">
+            <h1 class="text-2xl font-bold tracking-wider">FashionHub</h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="dashboard.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-home w-6"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="manage_products.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-tshirt w-6"></i>
+                <span class="font-medium">Manage Products</span>
+            </a>
+            <a href="add_product.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-box-open w-6"></i>
+                <span class="font-medium">Add Product</span>
+            </a>
+            <a href="manage_orders.html" class="flex items-center px-4 py-3 bg-blue-700 rounded-lg transition">
+                <i class="fas fa-shopping-cart w-6"></i>
+                <span class="font-medium">Manage Orders</span>
+            </a>
+            <a href="manage_users.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-users w-6"></i>
+                <span class="font-medium">Manage Users</span>
+            </a>
+            <a href="manage_banners.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
+                <i class="fas fa-images w-6"></i>
+                <span class="font-medium">Manage Banners</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-blue-700">
+            <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-y-auto relative">
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10 flex-shrink-0">
+            <h2 class="text-2xl font-semibold text-gray-800">Manage Orders</h2>
+            <div class="flex items-center space-x-4">
+                <span id="adminEmail" class="text-gray-600 font-medium">Loading...</span>
+                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">A</div>
+            </div>
+        </header>
+
+        <div class="p-8 flex-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-lg font-bold text-gray-800">Recent Customer Orders</h3>
+                    <button onclick="loadOrders()" class="text-blue-600 hover:text-blue-800"><i class="fas fa-sync-alt mr-1"></i> Refresh</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-white border-b border-gray-100 text-gray-500 text-sm">
+                                <th class="p-4 font-semibold">Order ID</th>
+                                <th class="p-4 font-semibold">Date</th>
+                                <th class="p-4 font-semibold">Customer Name</th>
+                                <th class="p-4 font-semibold">Total Price</th>
+                                <th class="p-4 font-semibold">Status</th>
+                                <th class="p-4 font-semibold text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="6" class="p-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl transition-all">
+            
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-gray-800">Order Details</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition text-2xl">×</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <div class="space-y-6">
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <p class="text-sm text-gray-500 mb-1">Order ID</p>
+                        <p id="modalOrderId" class="font-mono font-bold text-blue-800">---</p>
+                        
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Customer</p>
+                                <p id="modalCustomerName" class="font-semibold text-gray-800">---</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Phone</p>
+                                <p id="modalCustomerPhone" class="font-semibold text-gray-800">---</p>
+                            </div>
+                            <div class="col-span-2 mt-2 pt-3 border-t border-blue-100">
+                                <p class="text-sm text-gray-500 mb-1">Delivery Address</p>
+                                <p id="modalCustomerAddress" class="font-semibold text-gray-800">---</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-3 border-b pb-2">Products Ordered</h4>
+                        <div id="modalProductsList" class="space-y-3 max-h-48 overflow-y-auto pr-2">
+                        </div>
+                        <div class="mt-4 flex justify-between items-center border-t pt-3">
+                            <span class="font-bold text-gray-600">Total Amount:</span>
+                            <span id="modalTotalPrice" class="text-xl font-bold text-green-600">Rs. 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-3 border-b pb-2"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i> Delivery Location</h4>
+                        <div class="bg-gray-100 rounded-xl h-48 w-full overflow-hidden border border-gray-200 relative">
+                            <iframe id="mapIframe" class="w-full h-full border-0" src="" allowfullscreen="" loading="lazy"></iframe>
+                            <div id="noLocationMsg" class="hidden absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-500">
+                                Location not provided by customer
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                        <h4 class="font-bold text-gray-800 mb-3">Update Order Status</h4>
+                        <select id="statusSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white mb-4">
+                            <option value="Pending">Pending / Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        
+                        <button id="btnUpdateStatus" onclick="updateOrderStatus()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md flex justify-center items-center">
+                            <i class="fas fa-save mr-2"></i> Save Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Init Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAfzbiPQGW0RxTvCwopIxMGWahXVXx5XPg",
+            authDomain: "fashionhub-ac54e.firebaseapp.com",
+            projectId: "fashionhub-ac54e",
+            storageBucket: "fashionhub-ac54e.firebasestorage.app",
+            messagingSenderId: "48950739051",
+            appId: "1:48950739051:web:8467de427772ef3488312e",
+            measurementId: "G-SD64YNRJJY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentSelectedOrderId = null;
+
+        // Check Auth
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('adminEmail').innerText = user.email;
+                loadOrders(); 
+            } else {
+                window.location.replace('index.html');
+            }
+        });
+
+        // Load Table
+        function loadOrders() {
+            const tableBody = document.getElementById('ordersTableBody');
+            tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading orders...</td></tr>';
+
+            db.collection("orders").get()
+                .then((querySnapshot) => {
+                    tableBody.innerHTML = ""; 
+                    
+                    if (querySnapshot.empty) {
+                        tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500 font-medium">No orders found in Database.</td></tr>';
+                        return;
+                    }
+
+                    querySnapshot.forEach((doc) => {
+                        try {
+                            const order = doc.data();
+                            const orderId = doc.id;
+                            
+                            // Format Date
+                            let date = 'N/A';
+                            if (order.timestamp && typeof order.timestamp.toDate === 'function') {
+                                date = order.timestamp.toDate().toLocaleDateString();
+                            } else if (order.timestamp) {
+                                date = new Date(order.timestamp).toLocaleDateString();
+                            }
+
+                            const name = order.customerName || order.name || 'Unknown';
+                            // Get Total
+                            const price = order.totalAmount || order.totalPrice || order.price || 0;
+                            const status = order.status || 'Pending';
+
+                            // Set Status Color
+                            let statusColor = "bg-yellow-100 text-yellow-800";
+                            if(status === "Delivered") statusColor = "bg-green-100 text-green-800";
+                            if(status === "Shipped") statusColor = "bg-blue-100 text-blue-800";
+                            if(status === "Cancelled") statusColor = "bg-red-100 text-red-800";
+
+                            const row = `
+                                <tr class="hover:bg-gray-50 transition border-b border-gray-50">
+                                    <td class="p-4 font-mono text-sm text-gray-600">${orderId.substring(0, 8)}...</td>
+                                    <td class="p-4 text-sm text-gray-600">${date}</td>
+                                    <td class="p-4 text-sm font-medium text-gray-800">${name}</td>
+                                    <td class="p-4 text-sm font-bold text-gray-800">Rs. ${parseFloat(price).toFixed(2)}</td>
+                                    <td class="p-4">
+                                        <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">${status}</span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <button onclick="viewOrderDetails('${orderId}')" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.innerHTML += row;
+                        } catch (err) {
+                            console.error("Row error: ", err);
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error getting orders: ", error);
+                    tableBody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold"><i class="fas fa-exclamation-triangle mr-2"></i> Error: ${error.message}</td></tr>`;
+                });
+        }
+
+        // Show Modal
+        function viewOrderDetails(orderId) {
+            currentSelectedOrderId = orderId;
+            const modal = document.getElementById('orderModal');
+            
+            db.collection("orders").doc(orderId).get().then((doc) => {
+                if (doc.exists) {
+                    const order = doc.data();
+                    
+                    document.getElementById('modalOrderId').innerText = doc.id;
+                    document.getElementById('modalCustomerName').innerText = order.customerName || order.name || 'N/A';
+                    document.getElementById('modalCustomerPhone').innerText = order.customerPhone || order.phone || 'N/A';
+                    currentCustomerEmail = order.customerEmail || order.userEmail || order.email || "";
+                    currentCustomerName = order.customerName || order.name || "";
+                    
+                    // Show Address
+                    document.getElementById('modalCustomerAddress').innerText = order.deliveryAddress || order.address || 'Address not provided';
+                    
+                    // Show Total
+                    const tPrice = parseFloat(order.totalAmount || order.totalPrice || order.price || 0);
+                    document.getElementById('modalTotalPrice').innerText = "Rs. " + tPrice.toFixed(2);
+                    
+                    document.getElementById('statusSelect').value = order.status || 'Pending';
+
+                    // Product List
+                    const productsContainer = document.getElementById('modalProductsList');
+                    productsContainer.innerHTML = "";
+                    const items = order.items || order.products || order.cartItems || [];
+                    
+                    if(items.length > 0) {
+                        items.forEach(item => {
+                            let itemName = item.name || item.productName || item.title || 'Unknown Product';
+                            let itemPrice = parseFloat(item.price || 0).toFixed(2);
+                            let itemQty = item.qty || item.quantity || 1;
+                            let itemSize = item.size ? `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs ml-2 font-bold">Size: ${item.size}</span>` : '';
+                            
+                            productsContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-white p-3 border border-gray-100 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-12 h-12 bg-gray-100 rounded mr-3 flex items-center justify-center overflow-hidden shrink-0">
+                                            ${item.imageUrl || item.image ? `<img src="${item.imageUrl || item.image}" class="w-full h-full object-cover">` : `<i class="fas fa-box text-gray-400"></i>`}
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-sm text-gray-800">${itemName}</p>
+                                            <div class="flex items-center mt-1">
+                                                <p class="text-xs text-gray-500 font-bold bg-gray-100 px-2 py-0.5 rounded">Qty: ${itemQty}</p>
+                                                ${itemSize}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-gray-700 text-sm">Rs. ${itemPrice}</span>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        productsContainer.innerHTML = "<p class='text-sm text-gray-500'>Product details not available in database.</p>";
+                    }
+
+                    // Set Map
+                    const mapIframe = document.getElementById('mapIframe');
+                    const noLocMsg = document.getElementById('noLocationMsg');
+                    
+                    let lat = order.deliveryLat || order.latitude || (order.location ? order.location.latitude : null) || null;
+                    let lng = order.deliveryLng || order.longitude || (order.location ? order.location.longitude : null) || null;
+
+                    if(lat && lng) {
+                        mapIframe.classList.remove('hidden');
+                        noLocMsg.classList.add('hidden');
+                        mapIframe.src = `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+                    } else {
+                        mapIframe.classList.add('hidden');
+                        noLocMsg.classList.remove('hidden');
+                        mapIframe.src = "";
+                    }
+
+                    modal.classList.remove('hidden');
+                }
+            });
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('orderModal').classList.add('hidden');
+            currentSelectedOrderId = null;
+        }
+
+        let currentCustomerEmail = "";
+        let currentCustomerName = "";
+
+        // Update Status
+        function updateOrderStatus() {
+            if(!currentSelectedOrderId) return;
+            
+            const newStatus = document.getElementById('statusSelect').value;
+            const btn = document.getElementById('btnUpdateStatus');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Updating & Notifying...';
+            btn.disabled = true;
+
+            db.collection("orders").doc(currentSelectedOrderId).update({
+                status: newStatus,
+                statusUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(async () => {
+                // Send targeted customer notification
+                await sendOrderStatusNotification(currentSelectedOrderId, newStatus, currentCustomerEmail, currentCustomerName);
+
+                alert(`Order status updated to "${newStatus}" and notification dispatched to mobile app!`);
+                closeModal();
+                loadOrders(); 
+            })
+            .catch((error) => {
+                console.error("Error updating status: ", error);
+                alert("Failed to update status: " + error.message);
+            })
+            .finally(() => {
+                btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Status';
+                btn.disabled = false;
+            });
+        }
+
+        async function sendOrderStatusNotification(orderId, status, customerEmail, customerName) {
+            const shortId = orderId ? orderId.substring(0, 8) : "FH";
+            let notifTitle = `Order Status: ${status}`;
+            let notifMessage = `Your order #${shortId} status has been updated to ${status}.`;
+
+            if (status === "Shipped") {
+                notifTitle = `🚚 Order Shipped! #${shortId}`;
+                notifMessage = `Great news! Your order #${shortId} is on the way to your delivery address!`;
+            } else if (status === "Delivered") {
+                notifTitle = `🎉 Order Delivered! #${shortId}`;
+                notifMessage = `Your order #${shortId} has arrived! Thank you for shopping with FashionHub.`;
+            } else if (status === "Canceled" || status === "Cancelled") {
+                notifTitle = `⚠️ Order Cancelled #${shortId}`;
+                notifMessage = `Your order #${shortId} has been cancelled.`;
+            } else if (status === "Processing") {
+                notifTitle = `⚙️ Order Processing #${shortId}`;
+                notifMessage = `Your order #${shortId} is being prepared and packed.`;
+            }
+
+            // 1. Save in Firestore notifications collection (Real-time sync with mobile app)
+            try {
+                await db.collection("notifications").add({
+                    type: "order_status",
+                    orderId: orderId,
+                    recipientEmail: customerEmail || "unknown",
+                    customerName: customerName || "",
+                    title: notifTitle,
+                    message: notifMessage,
+                    status: status,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    read: false
+                });
+            } catch (err) {
+                console.error("Firestore notification error:", err);
+            }
+
+            // 2. Also try OneSignal push if available
+            try {
+                const ONESIGNAL_APP_ID = "8789c341-531e-4090-9232-5a39da79efd5";
+                const ONESIGNAL_REST_KEY = "hksx43blcuvb5ogl3urce6jx5";
+                const payload = {
+                    app_id: ONESIGNAL_APP_ID,
+                    headings: { en: notifTitle },
+                    contents: { en: notifMessage }
+                };
+
+                if (customerEmail) {
+                    payload.include_external_user_ids = [customerEmail];
+                    payload.channel_for_external_user_ids = "push";
+                } else {
+                    payload.included_segments = ["Subscribed Users"];
+                }
+
+                await fetch("https://onesignal.com/api/v1/notifications", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8",
+                        "Authorization": "Basic " + ONESIGNAL_REST_KEY
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                // Non-blocking
+            }
+        }
+
+        // Logout App
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            auth.signOut().then(() => {
+                window.location.replace('index.html');
+            }).catch((error) => {
+                alert("Logout Error: " + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
