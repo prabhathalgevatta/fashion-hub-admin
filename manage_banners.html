@@ -9,39 +9,56 @@
 </head>
 <body class="bg-gray-50 flex h-screen overflow-hidden">
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-blue-800 text-white flex flex-col hidden md:flex">
-        <div class="h-20 flex items-center justify-center border-b border-blue-700">
-            <h1 class="text-2xl font-bold tracking-wider">FashionHub</h1>
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden transition-opacity"></div>
+
+    <!-- Sidebar (Desktop static, Mobile drawer) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 max-w-[80vw] bg-blue-800 text-white flex flex-col transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:w-64 md:flex-shrink-0 shadow-2xl md:shadow-none">
+        <div class="h-16 sm:h-20 flex items-center justify-between px-5 sm:px-6 border-b border-blue-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white shadow text-sm">FH</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider leading-none">FashionHub</h1>
+                    <span class="text-[10px] text-blue-300 font-medium tracking-normal">Admin Panel</span>
+                </div>
+            </div>
+            <!-- Close button for mobile -->
+            <button onclick="toggleSidebar(false)" class="md:hidden text-blue-200 hover:text-white p-2 rounded-lg hover:bg-blue-700/50 transition focus:outline-none" aria-label="Close menu">
+                <i class="fas fa-times text-lg"></i>
+            </button>
         </div>
-        <nav class="flex-1 px-4 py-6 space-y-2">
-            <a href="dashboard.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
-                <i class="fas fa-home w-6"></i>
-                <span class="font-medium">Dashboard</span>
+        <nav class="flex-1 px-3 sm:px-4 py-4 sm:py-6 space-y-1.5 overflow-y-auto">
+            <a href="dashboard.html" class="flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 hover:text-white rounded-xl transition font-medium text-sm">
+                <i class="fas fa-home w-6 text-base"></i>
+                <span>Dashboard</span>
             </a>
-            <a href="manage_products.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
-                <i class="fas fa-tshirt w-6"></i>
-                <span class="font-medium">Manage Products</span>
+            <a href="manage_products.html" class="flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 hover:text-white rounded-xl transition font-medium text-sm">
+                <i class="fas fa-tshirt w-6 text-base"></i>
+                <span>Manage Products</span>
             </a>
-            <a href="add_product.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
-                <i class="fas fa-box-open w-6"></i>
-                <span class="font-medium">Add Product</span>
+            <a href="add_product.html" class="flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 hover:text-white rounded-xl transition font-medium text-sm">
+                <i class="fas fa-box-open w-6 text-base"></i>
+                <span>Add Product</span>
             </a>
-            <a href="manage_orders.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
-                <i class="fas fa-shopping-cart w-6"></i>
-                <span class="font-medium">Manage Orders</span>
+            <a href="manage_orders.html" class="flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 hover:text-white rounded-xl transition font-medium text-sm">
+                <i class="fas fa-shopping-cart w-6 text-base"></i>
+                <span>Manage Orders</span>
             </a>
-            <a href="manage_users.html" class="flex items-center px-4 py-3 hover:bg-blue-700 rounded-lg transition">
-                <i class="fas fa-users w-6"></i>
-                <span class="font-medium">Manage Users</span>
+            <a href="manage_users.html" class="flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 hover:text-white rounded-xl transition font-medium text-sm">
+                <i class="fas fa-users w-6 text-base"></i>
+                <span>Manage Users</span>
             </a>
-            <a href="manage_banners.html" class="flex items-center px-4 py-3 bg-blue-700 rounded-lg transition">
-                <i class="fas fa-images w-6"></i>
-                <span class="font-medium">Manage Banners</span>
+            <a href="manage_banners.html" class="flex items-center px-4 py-3 bg-blue-700 text-white rounded-xl transition font-medium text-sm shadow-sm">
+                <i class="fas fa-images w-6 text-base"></i>
+                <span>Manage Banners</span>
             </a>
         </nav>
-        <div class="p-4 border-t border-blue-700">
-            <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+        <div class="p-3 sm:p-4 border-t border-blue-700 space-y-2">
+            <div class="px-2 py-1 text-xs text-blue-200 flex items-center gap-2 truncate">
+                <i class="fas fa-user-shield text-blue-400"></i>
+                <span id="sidebarAdminEmail" class="truncate font-medium">Admin</span>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center px-4 py-2.5 bg-red-600 hover:bg-red-700 rounded-xl transition text-sm font-semibold shadow-sm">
                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
             </button>
         </div>
@@ -49,23 +66,28 @@
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col overflow-y-auto">
-        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10 flex-shrink-0">
+        <header class="h-16 sm:h-20 bg-white shadow-sm flex items-center justify-between px-4 sm:px-8 z-10 flex-shrink-0">
             <div class="flex items-center space-x-3">
-                <h2 class="text-2xl font-semibold text-gray-800">Banner & Promotion Management</h2>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <span class="w-2 h-2 mr-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                    Live Sync with App
-                </span>
+                <button onclick="toggleSidebar(true)" class="md:hidden p-2 rounded-xl text-gray-600 hover:text-blue-600 hover:bg-gray-100 focus:outline-none transition" aria-label="Open menu">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <h2 class="text-lg sm:text-2xl font-bold text-gray-800">Manage Banners</h2>
+                    <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span class="w-2 h-2 mr-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                        Live Sync
+                    </span>
+                </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <span id="adminEmail" class="text-gray-600 font-medium">Loading...</span>
-                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
+            <div class="flex items-center space-x-3">
+                <span id="adminEmail" class="text-gray-600 font-medium text-xs sm:text-sm hidden sm:inline max-w-[180px] truncate">Loading...</span>
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm sm:text-base shadow-xs">
                     A
                 </div>
             </div>
         </header>
 
-        <div class="p-8 space-y-8 flex-1">
+        <div class="p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8 flex-1 pb-24 md:pb-8">
             <!-- Stats Bar -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center">
@@ -268,6 +290,30 @@
         </div>
     </main>
 
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 flex items-center justify-around py-2 px-1 shadow-lg">
+        <a href="dashboard.html" class="flex flex-col items-center py-1 px-3 text-gray-500 hover:text-blue-600 font-medium">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[10px] mt-0.5">Home</span>
+        </a>
+        <a href="manage_products.html" class="flex flex-col items-center py-1 px-3 text-gray-500 hover:text-blue-600 font-medium">
+            <i class="fas fa-tshirt text-lg"></i>
+            <span class="text-[10px] mt-0.5">Products</span>
+        </a>
+        <a href="manage_orders.html" class="flex flex-col items-center py-1 px-3 text-gray-500 hover:text-blue-600 font-medium">
+            <i class="fas fa-shopping-cart text-lg"></i>
+            <span class="text-[10px] mt-0.5">Orders</span>
+        </a>
+        <a href="manage_users.html" class="flex flex-col items-center py-1 px-3 text-gray-500 hover:text-blue-600 font-medium">
+            <i class="fas fa-users text-lg"></i>
+            <span class="text-[10px] mt-0.5">Users</span>
+        </a>
+        <button onclick="toggleSidebar(true)" class="flex flex-col items-center py-1 px-3 text-blue-600 font-bold focus:outline-none">
+            <i class="fas fa-bars text-lg"></i>
+            <span class="text-[10px] mt-0.5">Menu</span>
+        </button>
+    </nav>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -293,7 +339,10 @@
         // Auth check
         auth.onAuthStateChanged((user) => {
             if (user) {
-                document.getElementById('adminEmail').innerText = user.email;
+                const emailEl = document.getElementById('adminEmail');
+                if (emailEl) emailEl.innerText = user.email;
+                const sideEmailEl = document.getElementById('sidebarAdminEmail');
+                if (sideEmailEl) sideEmailEl.innerText = user.email;
                 listenToBanners();
             } else {
                 window.location.replace('index.html');
@@ -571,6 +620,30 @@
                 }
             }
         }
+
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (!sidebar || !backdrop) return;
+            
+            const isHidden = sidebar.classList.contains('-translate-x-full');
+            const shouldOpen = open !== undefined ? open : isHidden;
+            
+            if (shouldOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden', 'md:overflow-auto');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden', 'md:overflow-auto');
+            }
+        }
+
+        // Close sidebar on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') toggleSidebar(false);
+        });
 
         function logout() {
             localStorage.clear();
